@@ -78,8 +78,10 @@ public class UserController {
                     !user.getLogin().contains(" ")&
                     !user.getBirthday().isAfter(LocalDate.now())) {
                 return true;
-            } else
-                return false;
+            } else {
+                throw new ValidationException("Не прошла валидация");
+                //return false;
+            }
         } catch (NullPointerException e) {
             log.info("Пришел запрос с пустыми полями");
             throw new ValidationException("Пришел запрос с пустыми полями");
