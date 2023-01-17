@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping(StaticPaths.USER_PATH)
-    public User create(@RequestBody @Valid User user) throws ValidationException {
+    public User create(@Valid @RequestBody User user) throws ValidationException {
         try {
             if (validate(user)) {
                 if (user.getName()==null) {
@@ -69,7 +69,7 @@ public class UserController {
         }
     }
 
-    private Boolean validate (User user) throws ValidationException {
+    private Boolean validate(User user) throws ValidationException {
         try {
             if (!user.getEmail().isEmpty()&
                     user.getEmail().contains("@")&
