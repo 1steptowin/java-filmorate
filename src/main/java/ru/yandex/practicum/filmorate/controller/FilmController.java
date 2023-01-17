@@ -19,7 +19,7 @@ public class FilmController {
 
     private final HashMap<Integer,Film> films = new HashMap<>();
 
-    @GetMapping("/films")
+    @GetMapping(StaticPaths.FILM_PATH)
     public List<Film> findAll(){
         List<Film> list = new ArrayList<>();
         for (Film film: films.values()) {
@@ -28,7 +28,7 @@ public class FilmController {
         return list;
     }
 
-    @PostMapping("/films")
+    @PostMapping(StaticPaths.FILM_PATH)
     public Film create(@RequestBody Film film) throws ValidationException {
         if (validate(film)){
             film.setId(films.size()+1);
@@ -40,7 +40,7 @@ public class FilmController {
             throw new ValidationException("Не прошла валидация");
         }
     }
-    @PutMapping("/films")
+    @PutMapping(StaticPaths.FILM_PATH)
     public Film update(@RequestBody Film film) throws InvalidFilmId, ValidationException {
         if (validate(film)) {
             for (Integer i : films.keySet()) {
@@ -62,7 +62,7 @@ public class FilmController {
             if (film.getDescription().length()<=200&
                     film.getReleaseDate().isAfter(LocalDate.of(1895,12,28))&
                     !(film.getDuration()<=0)&
-                    !film.getName().isEmpty()){
+                    !film.getName().isEmpty()) {
                 return true;
             } else
                 return false;

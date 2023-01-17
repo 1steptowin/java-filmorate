@@ -14,9 +14,9 @@ import java.util.List;
 @Slf4j
 @RestController
 public class UserController {
-    private HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Integer, User> users = new HashMap<>();
 
-    @GetMapping("/users")
+    @GetMapping(StaticPaths.USER_PATH)
     public List<User> findAll(){
         List<User> list = new ArrayList<>();
         for (User user: users.values()) {
@@ -25,7 +25,7 @@ public class UserController {
         return list;
     }
 
-    @PostMapping("/users")
+    @PostMapping(StaticPaths.USER_PATH)
     public User create(@RequestBody @Valid User user) throws ValidationException {
         try {
             if (validate(user)) {
@@ -46,7 +46,7 @@ public class UserController {
         }
 
     }
-    @PutMapping("/users")
+    @PutMapping(StaticPaths.USER_PATH)
     public User update(@RequestBody User user) throws InvalidUserId, ValidationException {
         if (validate(user)) {
 
