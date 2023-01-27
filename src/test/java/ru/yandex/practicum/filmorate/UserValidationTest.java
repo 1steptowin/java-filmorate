@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -16,7 +17,7 @@ public class UserValidationTest {
     UserController controller;
     @BeforeEach
     void createController() {
-        controller = new UserController();
+        controller = new UserController(new InMemoryUserStorage());
     }
 
     void validateException (User user) {

@@ -5,23 +5,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class FilmValidationTest {
     FilmController controller;
     @BeforeEach
     void createController() {
-        controller = new FilmController();
+        controller = new FilmController(new InMemoryFilmStorage());
     }
 
     void validateException (Film film) {
         try {
             controller.create(film);
-            assertEquals(true,true);
+            assertTrue(true);
             System.out.println("Валидация прошла");
         } catch (ValidationException e) {
             assertEquals(e.getMessage(),"Не прошла валидация");
@@ -30,7 +32,7 @@ public class FilmValidationTest {
     }
     void validate (Film film) throws ValidationException {
         controller.create(film);
-        assertEquals(true,true);
+        assertTrue(true);
         System.out.println("Валидация прошла");
     }
     @Test

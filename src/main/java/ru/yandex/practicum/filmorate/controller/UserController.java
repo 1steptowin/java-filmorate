@@ -2,38 +2,35 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.Exception.InvalidUserId;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 @Slf4j
 @RestController
 public class UserController {
-    private final HashMap<Integer, User> users = new HashMap<>();
 
+    InMemoryUserStorage storage;
+    @Autowired
+    public UserController(InMemoryUserStorage storage) {
+        this.storage = storage;
+    }
     @GetMapping(StaticPaths.USER_PATH)
-    public List<User> findAll(){
-        List<User> list = new ArrayList<>();
-        for (User user: users.values()) {
-        list.add(user);
-        }
-        return list;
+    public ArrayList<User> findAll(){
+        return storage.findAll();
     }
 
     @PostMapping(StaticPaths.USER_PATH)
     public User create(@Valid @RequestBody User user) throws ValidationException {
         try {
             if (validate(user)) {
-                if (user.getName()==null) {
-                    user.setName(user.getLogin());
-                }
-                user.setId(users.size()+1);
-                users.put(users.size() + 1, user);
+                storage.create(user);
                 log.info("Добавлен пользователь",user);
                 return user;
             } else {
@@ -47,21 +44,14 @@ public class UserController {
 
     }
     @PutMapping(StaticPaths.USER_PATH)
-    public User update(@RequestBody User user) throws InvalidUserId, ValidationException {
+    public User update(@RequestBody User user) throws  ValidationException {
         if (validate(user)) {
-
-            for (Integer i : users.keySet()) {
-                if (users.get(i).getId() == (user.getId())) {
-                    if (user.getName().isEmpty()){
-                        user.setName(user.getLogin());
-                    }
-                    users.put(i, user);
-                    log.info("Пользователь обновлен", user);
-                    return users.get(i);
-                }
+            try {
+                return storage.update(user);
+            } catch (InvalidUserId e) {
+                log.warn("Ошибка обновления пользователя", user);
+                return user;
             }
-            log.warn("Ошибка обновления пользователя", user);
-            throw new InvalidUserId("Данного юзера не существует");
         }
         else {
             log.warn("шибка валидации юзера", user);
