@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.Exception.InvalidFilmId;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 
@@ -18,10 +19,12 @@ import java.util.ArrayList;
 public class FilmController {
 
     InMemoryFilmStorage storage;
+    FilmService service;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage storage) {
+    public FilmController(InMemoryFilmStorage storage, FilmService service) {
         this.storage = storage;
+        this.service = service;
     }
     @GetMapping(StaticPaths.FILM_PATH)
     public ArrayList<Film> findAll(){
@@ -32,10 +35,10 @@ public class FilmController {
     public Film create(@RequestBody Film film) throws ValidationException {
         if (validate(film)){
             storage.create(film);
-            log.info("Фильм "+film.getName()+" добавлен", film);
+            log.info("Фильм "+film.getName()+" добавлен");
             return film;
         } else {
-            log.warn("Фильм не прошел валидацию", film);
+            log.warn("Фильм не прошел валидацию");
             throw new ValidationException("Не прошла валидация");
         }
     }
@@ -45,11 +48,11 @@ public class FilmController {
            try {
                return storage.update(film);
            } catch (InvalidFilmId e) {
-               log.warn("Ошибка при обновлении фильма", film);
+               log.warn("Ошибка при обновлении фильма");
                return film;
            }
         } else {
-            log.warn("Ошибка валидации фильма",film);
+            log.warn("Ошибка валидации фильма");
             throw new ValidationException("Ошибка валидации");
         }
     }

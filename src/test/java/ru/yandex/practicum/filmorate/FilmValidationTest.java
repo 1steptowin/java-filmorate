@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
@@ -17,7 +18,9 @@ public class FilmValidationTest {
     FilmController controller;
     @BeforeEach
     void createController() {
-        controller = new FilmController(new InMemoryFilmStorage());
+        InMemoryFilmStorage storage = new InMemoryFilmStorage();
+        FilmService service = new FilmService(storage);
+        controller = new FilmController(storage,service);
     }
 
     void validateException (Film film) {

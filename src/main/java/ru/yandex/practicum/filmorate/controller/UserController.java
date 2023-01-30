@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.Exception.InvalidUserId;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -17,9 +18,11 @@ import java.util.ArrayList;
 public class UserController {
 
     InMemoryUserStorage storage;
+    UserService service;
     @Autowired
-    public UserController(InMemoryUserStorage storage) {
+    public UserController(InMemoryUserStorage storage, UserService service) {
         this.storage = storage;
+        this.service = service;
     }
     @GetMapping(StaticPaths.USER_PATH)
     public ArrayList<User> findAll(){
@@ -31,14 +34,14 @@ public class UserController {
         try {
             if (validate(user)) {
                 storage.create(user);
-                log.info("Добавлен пользователь",user);
+                log.info("Добавлен пользователь");
                 return user;
             } else {
                 log.warn("Ошибка валидации пользователя");
                 throw new ValidationException("Ошибка валидации user");
             }
         } catch (NullPointerException e) {
-            log.warn("Ошибка отправки запроса",user);
+            log.warn("Ошибка отправки запроса");
             throw new ValidationException("Пришло пустое поле");
         }
 
@@ -49,12 +52,12 @@ public class UserController {
             try {
                 return storage.update(user);
             } catch (InvalidUserId e) {
-                log.warn("Ошибка обновления пользователя", user);
+                log.warn("Ошибка обновления пользователя");
                 return user;
             }
         }
         else {
-            log.warn("шибка валидации юзера", user);
+            log.warn("шибка валидации юзера");
             throw new ValidationException("Ошибка валидации юзера");
         }
     }

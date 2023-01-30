@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -17,7 +18,9 @@ public class UserValidationTest {
     UserController controller;
     @BeforeEach
     void createController() {
-        controller = new UserController(new InMemoryUserStorage());
+        InMemoryUserStorage storage = new InMemoryUserStorage();
+        UserService service = new UserService(storage);
+        controller = new UserController(storage,service);
     }
 
     void validateException (User user) {
@@ -31,14 +34,14 @@ public class UserValidationTest {
 
     @Test
     void validateIncorrectEmail() {
-        final User user = new User("123mail.ru","123",LocalDate.of(2020,1,1));
+        final User user = new User("123mail.ru","123",LocalDate.of(2020,1,1),null);
         user.setId(1);
         user.setName("123");
         validateException(user);
     }
     @Test
     void validateBlancEmail() {
-        final User user = new User("","123",LocalDate.of(2020,1,1));
+        final User user = new User("","123",LocalDate.of(2020,1,1),null);
         user.setId(1);
         user.setName("123");
         validateException(user);
@@ -46,28 +49,28 @@ public class UserValidationTest {
 
     @Test
     void validateIncorrectLogin() {
-        final User user = new User("123@mail.ru","123 123",LocalDate.of(2020,1,1));
+        final User user = new User("123@mail.ru","123 123",LocalDate.of(2020,1,1), null);
         user.setId(1);
         user.setName("123");
         validateException(user);
     }
     @Test
     void validateBlancLogin() {
-        final User user = new User("123@mail.ru","",LocalDate.of(2020,1,1));
+        final User user = new User("123@mail.ru","",LocalDate.of(2020,1,1), null);
         user.setId(1);
         user.setName("123");
         validateException(user);
     }
     @Test
     void validateBlancName() {
-        final User user = new User("123@mail.ru","123",LocalDate.of(2020,1,1));
+        final User user = new User("123@mail.ru","123",LocalDate.of(2020,1,1), null);
         user.setId(1);
         validateException(user);
         assertEquals(user.getLogin(),user.getName());
     }
     @Test
     void validateBirthDayAfterNow() {
-        final User user = new User("123@mail.ru","123",LocalDate.of(2024,1,1));
+        final User user = new User("123@mail.ru","123",LocalDate.of(2024,1,1), null);
         user.setId(1);
         validateException(user);
     }
