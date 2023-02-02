@@ -34,14 +34,14 @@ public class UserValidationTest {
 
     @Test
     void validateIncorrectEmail() {
-        final User user = new User("123mail.ru","123",LocalDate.of(2020,1,1),null);
+        final User user = new User("123mail.ru","123",LocalDate.of(2020,1,1));
         user.setId(1);
         user.setName("123");
         validateException(user);
     }
     @Test
     void validateBlancEmail() {
-        final User user = new User("","123",LocalDate.of(2020,1,1),null);
+        final User user = new User("","123",LocalDate.of(2020,1,1));
         user.setId(1);
         user.setName("123");
         validateException(user);
@@ -49,28 +49,29 @@ public class UserValidationTest {
 
     @Test
     void validateIncorrectLogin() {
-        final User user = new User("123@mail.ru","123 123",LocalDate.of(2020,1,1), null);
+        final User user = new User("123@mail.ru","123 123",LocalDate.of(2020,1,1));
         user.setId(1);
         user.setName("123");
         validateException(user);
     }
     @Test
     void validateBlancLogin() {
-        final User user = new User("123@mail.ru","",LocalDate.of(2020,1,1), null);
+        final User user = new User("123@mail.ru","",LocalDate.of(2020,1,1));
         user.setId(1);
         user.setName("123");
         validateException(user);
     }
     @Test
-    void validateBlancName() {
-        final User user = new User("123@mail.ru","123",LocalDate.of(2020,1,1), null);
+    void validateBlancName() throws ValidationException {
+        final User user = new User("123@mail.ru","123",LocalDate.of(2020,1,1));
         user.setId(1);
-        validateException(user);
+        user.setName("");
+        controller.create(user);
         assertEquals(user.getLogin(),user.getName());
     }
     @Test
     void validateBirthDayAfterNow() {
-        final User user = new User("123@mail.ru","123",LocalDate.of(2024,1,1), null);
+        final User user = new User("123@mail.ru","123",LocalDate.of(2024,1,1));
         user.setId(1);
         validateException(user);
     }
