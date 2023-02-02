@@ -24,12 +24,15 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public Film update(Film film) throws InvalidFilmId {
-        for (Integer i : films.keySet()) {
-            if (films.get(i).getId() == (film.getId())) {
-                films.put(i, film);
-                return films.get(i);
-            }
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(),film);
+            return film;
         }
-        throw new InvalidFilmId("Фильм не найден");
+        else {
+            throw new InvalidFilmId("Фильм не найден");
+        }
+    }
+    public Film getFilm (int id) {
+        return films.get(id);
     }
 }

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import ru.yandex.practicum.filmorate.Exception.InvalidFilmId;
 import ru.yandex.practicum.filmorate.Exception.InvalidUserId;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -11,5 +10,7 @@ public interface UserStorage {
 
     void create(User user);
 
-    User update(User user) throws InvalidFilmId, InvalidUserId;
+    User update(User user) throws InvalidUserId;
+
+    User getUser(int id);
 }

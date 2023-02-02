@@ -18,7 +18,7 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public void create(User user) {
-        if (user.getName()==null) {
+        if (user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         user.setId(users.size()+1);
@@ -27,16 +27,16 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public User update(User user) throws  InvalidUserId {
-        for (Integer i : users.keySet()) {
-            if (users.get(i).getId() == (user.getId())) {
-                if (user.getName().isEmpty()){
-                    user.setName(user.getLogin());
-                }
-                users.put(i, user);
-                return users.get(i);
-            }
+        if (users.containsKey(user.getId())) {
+            users.put(user.getId(), user);
+            return user;
+        } else {
+            throw new InvalidUserId("Пользователя не существует");
         }
-        throw new InvalidUserId("Пользователя не существует");
+    }
+
+    public User getUser(int id) {
+        return users.get(id);
     }
 
 }

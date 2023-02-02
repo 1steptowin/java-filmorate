@@ -20,5 +20,6 @@ public class User {
     @NonFinal
     String name;
     LocalDate birthday;
+    @NonFinal
     Set<Integer> friends;
 }
