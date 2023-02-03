@@ -58,7 +58,7 @@ public class UserController {
             }
         }
         else {
-            log.warn("шибка валидации юзера");
+            log.warn("Ошибка валидации пользователя");
             throw new ValidationException("Ошибка валидации юзера");
         }
     }
@@ -111,7 +111,7 @@ public class UserController {
                 return friends;
             } else
                 return null;
-        } else throw new InvalidUserId("Некорректный id");
+        } else throw new InvalidUserId("Некорректный id пользователя");
     }
 
     @GetMapping(StaticPaths.USER_PATH +"/{id}/friends/common/{friendId}")
@@ -119,7 +119,7 @@ public class UserController {
         if (storage.getUser(id) != null & storage.getUser(friendId) != null) {
             return service.mutualFriends(storage.getUser(id), storage.getUser(friendId));
         } else {
-            throw new InvalidUserId("Не валидный id");
+            throw new InvalidUserId("Некорректный id пользователя");
         }
     }
     @ExceptionHandler

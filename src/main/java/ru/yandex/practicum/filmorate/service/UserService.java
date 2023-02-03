@@ -49,21 +49,6 @@ public class UserService {
         } else {
             friends2 = new HashSet<>();
         }
-        /*if (user1.getFriends()!= null) {
-            if (user2.getFriends()!=null){
-                friends1 = user1.getFriends();
-                friends2 = user2.getFriends();
-            } else {
-                friends1 = user1.getFriends();
-                friends2 = new HashSet<>();
-            }
-        } else if(user2.getFriends()!=null) {
-            friends1 = new HashSet<>();
-            friends2 = user2.getFriends();
-        } else {
-            friends1 = new HashSet<>();
-            friends2 = new HashSet<>();
-        }*/
         friends1.add(user2.getId());
         friends2.add(user1.getId());
         user1.setFriends(friends1);
@@ -86,7 +71,7 @@ public class UserService {
             }
         }
          else {
-            throw new InvalidUserId("Не тот айди");
+            throw new InvalidUserId("Некорректный id пользователя");
         }
 
     }
