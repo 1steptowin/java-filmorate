@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data @FieldDefaults(makeFinal=true, level= AccessLevel.PRIVATE)
 public class User {
@@ -19,4 +20,6 @@ public class User {
     @NonFinal
     String name;
     LocalDate birthday;
+    @NonFinal
+    Set<Integer> friends;
 }

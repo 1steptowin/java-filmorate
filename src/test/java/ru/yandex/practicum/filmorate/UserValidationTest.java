@@ -6,6 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -16,7 +18,9 @@ public class UserValidationTest {
     UserController controller;
     @BeforeEach
     void createController() {
-        controller = new UserController();
+        InMemoryUserStorage storage = new InMemoryUserStorage();
+        UserService service = new UserService(storage);
+        controller = new UserController(storage,service);
     }
 
     void validateException (User user) {
@@ -58,10 +62,11 @@ public class UserValidationTest {
         validateException(user);
     }
     @Test
-    void validateBlancName() {
+    void validateBlancName() throws ValidationException {
         final User user = new User("123@mail.ru","123",LocalDate.of(2020,1,1));
         user.setId(1);
-        validateException(user);
+        user.setName("");
+        controller.create(user);
         assertEquals(user.getLogin(),user.getName());
     }
     @Test

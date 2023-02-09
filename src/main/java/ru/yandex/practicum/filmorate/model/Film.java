@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data @Slf4j @FieldDefaults(makeFinal=true, level= AccessLevel.PRIVATE)
 public class Film {
@@ -15,5 +16,6 @@ public class Film {
     String description;
     LocalDate releaseDate;
     int duration;
-
+    @NonFinal
+    Set<Integer> likes;
 }
