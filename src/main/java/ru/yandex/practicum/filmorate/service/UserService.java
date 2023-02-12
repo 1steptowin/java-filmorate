@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,7 +38,7 @@ public class UserService {
     }
     public void addFriend(User user1, User user2) throws InvalidUserId {
         Set<Integer> friends1;
-        Set<Integer> friends2;
+        ArrayList<Integer> friends2;
         if (user1.getFriends() != null) {
             friends1 = user1.getFriends();
         } else {
@@ -45,16 +46,46 @@ public class UserService {
         }
 
         if (user2.getFriends() != null) {
-            friends2 = user2.getFriends();
+            friends2 = user2.getReceiveToFriends();
         } else {
-            friends2 = new HashSet<>();
+            friends2 = new ArrayList<>() {
+            };
         }
         friends1.add(user2.getId());
         friends2.add(user1.getId());
         user1.setFriends(friends1);
-        user2.setFriends(friends2);
+        user2.setReceiveToFriends(friends2);
         storage.update(user1);
         storage.update(user2);
+    }
+
+    public void acceptFriend(User user1, User user2) throws InvalidUserId {
+        if (user1.getReceiveToFriends() != null) {
+            ArrayList<Integer> receiveToFriends = user1.getReceiveToFriends();
+            if (receiveToFriends.contains(user2.getId())) {
+                if (user1.getFriends() != null) {
+                    Set<Integer> friends = user1.getFriends();
+                    friends.add(user2.getId());
+                    receiveToFriends.remove(user2.getId());
+                    user1.setReceiveToFriends(receiveToFriends);
+                    user1.setFriends(friends);
+                    storage.update(user1);
+                } else {
+                    Set<Integer> friends = new HashSet<>();
+                    friends.add(user2.getId());
+                    receiveToFriends.remove(user2.getId());
+                    user1.setReceiveToFriends(receiveToFriends);
+                    user1.setFriends(friends);
+                    storage.update(user1);
+                }
+
+            } else {
+                throw new InvalidUserId("У данного пользователя нет такой заявки");
+            }
+
+        } else {
+            throw new InvalidUserId("У данного пользователя нет заявок в друзья");
+        }
     }
 
     public void deleteFriend(User user1, User user2) throws InvalidUserId {

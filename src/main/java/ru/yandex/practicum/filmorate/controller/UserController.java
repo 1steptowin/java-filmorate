@@ -86,6 +86,17 @@ public class UserController {
             throw new InvalidUserId("Какого-то пользователя не существует");
         }
     }
+
+    @PutMapping(StaticPaths.USER_PATH+"/{id}/friends/{friendId}/accept")
+    public Map<User,User> acceptFriend(@PathVariable int id, @PathVariable int friendId) throws InvalidUserId {
+        if (storage.getUser(id) != null & storage.getUser(friendId) != null) {
+            service.acceptFriend(storage.getUser(id), storage.getUser(friendId));
+            log.info(storage.getUser(id).getName() + " принял заявку в друзья от "+ storage.getUser(friendId).getName());
+            return Map.of(storage.getUser(id), storage.getUser(friendId));
+        } else {
+            throw new InvalidUserId("Какого-то пользователя не существует");
+        }
+    }
     @DeleteMapping(StaticPaths.USER_PATH+"/{id}/friends/{friendId}")
     public Map<User,User> deleteFriend(@PathVariable int id, @PathVariable int friendId) throws InvalidUserId {
         if (storage.getUser(id) != null & storage.getUser(friendId) != null) {
