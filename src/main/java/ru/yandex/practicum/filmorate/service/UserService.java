@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,68 +37,46 @@ public class UserService {
         }
     }
     public void addFriend(User user1, User user2) throws InvalidUserId {
-        Set<Integer> friends1;
-        ArrayList<Integer> friends2;
+        HashMap<Integer,Boolean> friends1;
+        HashMap<Integer, Boolean> friends2;
         if (user1.getFriends() != null) {
             friends1 = user1.getFriends();
         } else {
-            friends1 = new HashSet<>();
+            friends1 = new HashMap<>();
         }
 
         if (user2.getFriends() != null) {
-            friends2 = user2.getReceiveToFriends();
+            friends2 = user2.getFriends();
         } else {
-            friends2 = new ArrayList<>() {
+            friends2 = new HashMap<>() {
             };
         }
-        friends1.add(user2.getId());
-        friends2.add(user1.getId());
-        user1.setFriends(friends1);
-        user2.setReceiveToFriends(friends2);
-        storage.update(user1);
-        storage.update(user2);
-    }
-
-    public void acceptFriend(User user1, User user2) throws InvalidUserId {
-        if (user1.getReceiveToFriends() != null) {
-            ArrayList<Integer> receiveToFriends = user1.getReceiveToFriends();
-            if (receiveToFriends.contains(user2.getId())) {
-                if (user1.getFriends() != null) {
-                    Set<Integer> friends = user1.getFriends();
-                    friends.add(user2.getId());
-                    receiveToFriends.remove(user2.getId());
-                    user1.setReceiveToFriends(receiveToFriends);
-                    user1.setFriends(friends);
-                    storage.update(user1);
-                } else {
-                    Set<Integer> friends = new HashSet<>();
-                    friends.add(user2.getId());
-                    receiveToFriends.remove(user2.getId());
-                    user1.setReceiveToFriends(receiveToFriends);
-                    user1.setFriends(friends);
-                    storage.update(user1);
-                }
-
-            } else {
-                throw new InvalidUserId("У данного пользователя нет такой заявки");
+        if (friends2.containsKey(user1.getId())) {
+            if (!friends2.get(user1.getId())) {
+            friends2.put(user1.getId(),false);
+            user2.setFriends(friends2);
+            storage.update(user2);
             }
-
         } else {
-            throw new InvalidUserId("У данного пользователя нет заявок в друзья");
+            friends2.put(user1.getId(),false);
+            user2.setFriends(friends2);
+            storage.update(user2);
         }
+
+        friends1.put(user2.getId(),true);
+        user1.setFriends(friends1);
+        storage.update(user1);
+
     }
 
     public void deleteFriend(User user1, User user2) throws InvalidUserId {
         if (user1.getFriends() != null
         & user2.getFriends() != null) {
-            if (user1.getFriends().contains(user2.getId())
-                    & user2.getFriends().contains(user1.getId())) {
-                Set<Integer> friends1 = user1.getFriends();
+            if (user1.getFriends().containsKey(user2.getId())
+                    & user2.getFriends().containsKey(user1.getId())) {
+                HashMap<Integer,Boolean> friends1 = user1.getFriends();
                 friends1.remove(user2.getId());
-                Set<Integer> friends2 = user2.getFriends();
-                friends2.remove(user1.getId());
                 storage.update(user1);
-                storage.update(user2);
             }
         }
          else {
@@ -109,7 +87,9 @@ public class UserService {
 
     public Set<User> mutualFriends(User user1, User user2) {
         try {
-            Set<Integer> common = findCommonElements(user1.getFriends(),user2.getFriends());
+            Set<Integer> user1Friends = user1.getFriends().keySet();
+            Set<Integer> user2Friends = user2.getFriends().keySet();
+            Set<Integer> common = findCommonElements(user1Friends,user2Friends);
             Set<User> commonUsers = new HashSet<>();
             for (Integer i: common) {
                 commonUsers.add(storage.getUser(i));

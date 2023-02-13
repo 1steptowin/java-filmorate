@@ -8,8 +8,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.HashMap;
 
 @Data @FieldDefaults(makeFinal=true, level= AccessLevel.PRIVATE)
 public class User {
@@ -23,7 +22,5 @@ public class User {
     String name;
     LocalDate birthday;
     @NonFinal
-    Set<Integer> friends;
-    @NonFinal
-    ArrayList<Integer> receiveToFriends;
+    HashMap<Integer, Boolean> friends;
 }
