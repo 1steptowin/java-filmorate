@@ -10,17 +10,14 @@ import lombok.experimental.NonFinal;
 import java.time.LocalDate;
 import java.util.HashMap;
 
-@Data @FieldDefaults(makeFinal=true, level= AccessLevel.PRIVATE)
+@Data
 public class User {
     @NonFinal
     int id;
-    @Email
     String email;
-    @NotNull
     String login;
-    @NonFinal
     String name;
     LocalDate birthday;
-    @NonFinal
     HashMap<Integer, Boolean> friends;
+
 }

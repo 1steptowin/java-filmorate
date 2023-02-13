@@ -19,6 +19,8 @@ public class Film {
     int duration;
     @NonFinal
     Set<Integer> likes;
+    @NonFinal
     Rating rating;
+    @NonFinal
     List<Genre> genres;
 }

@@ -1,16 +1,16 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Exception.InvalidUserId;
+import ru.yandex.practicum.filmorate.Exception.SqlUpdateException;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -20,6 +20,33 @@ public class UserService {
     public UserService(UserStorage storage) {
         this.storage = storage;
     }
+
+    public ArrayList<User> findAll() {
+        return (ArrayList<User>) storage.findAll();
+    }
+
+    public void createUser(User user) throws ValidationException {
+        if (validate(user)) {
+           try {
+               storage.create(user);
+           } catch (SqlUpdateException e) {
+               throw new ValidationException("Пользователь существует");
+           }
+        } else {
+            throw new ValidationException("Ошибка валидации");
+        }
+    }
+
+    public void updateUser(User user) throws ValidationException, InvalidUserId {
+        if (validate(user)) {
+            storage.update(user);
+        }
+    }
+
+    public User findById(int id) throws InvalidUserId {
+        return storage.getUser(id);
+    }
+
 
     public Boolean validate(User user) throws ValidationException {
         try {
@@ -36,37 +63,10 @@ public class UserService {
             throw new ValidationException("Пришел запрос с пустыми полями");
         }
     }
-    public void addFriend(User user1, User user2) throws InvalidUserId {
-        HashMap<Integer,Boolean> friends1;
-        HashMap<Integer, Boolean> friends2;
-        if (user1.getFriends() != null) {
-            friends1 = user1.getFriends();
-        } else {
-            friends1 = new HashMap<>();
-        }
-
-        if (user2.getFriends() != null) {
-            friends2 = user2.getFriends();
-        } else {
-            friends2 = new HashMap<>() {
-            };
-        }
-        if (friends2.containsKey(user1.getId())) {
-            if (!friends2.get(user1.getId())) {
-            friends2.put(user1.getId(),false);
-            user2.setFriends(friends2);
-            storage.update(user2);
-            }
-        } else {
-            friends2.put(user1.getId(),false);
-            user2.setFriends(friends2);
-            storage.update(user2);
-        }
-
-        friends1.put(user2.getId(),true);
-        user1.setFriends(friends1);
-        storage.update(user1);
-
+    public void addFriend(int id, int friendId) throws InvalidUserId {
+        User user = findById(id);
+        User friend = findById(friendId);
+        storage.addFriend(id,friendId);
     }
 
     public void deleteFriend(User user1, User user2) throws InvalidUserId {
@@ -85,19 +85,12 @@ public class UserService {
 
     }
 
-    public Set<User> mutualFriends(User user1, User user2) {
-        try {
-            Set<Integer> user1Friends = user1.getFriends().keySet();
-            Set<Integer> user2Friends = user2.getFriends().keySet();
-            Set<Integer> common = findCommonElements(user1Friends,user2Friends);
-            Set<User> commonUsers = new HashSet<>();
-            for (Integer i: common) {
-                commonUsers.add(storage.getUser(i));
-            }
-            return commonUsers;
-        } catch (NullPointerException e) {
-            return new HashSet<>();
-        }
+    public Set<User> mutualFriends(int id, int friendId) throws InvalidUserId {
+        User user = storage.getUser(id);
+        User friend = storage.getUser(friendId);
+        Set<User> userFriends = new HashSet(storage.findFriends(id));
+        Set<User> friendFriends = new HashSet(storage.findFriends(friendId));
+        return findCommonElements(userFriends,friendFriends);
 
     }
     private static <T> Set<T> findCommonElements(Set<T> first, Set<T> second) {
@@ -106,4 +99,13 @@ public class UserService {
         return common;
     }
 
+    public List<User> findFriends(int id) throws InvalidUserId {
+        List<Integer> friends_id = storage.findFriends(id);
+        System.out.println(friends_id);
+        List<User> friends = new ArrayList<>();
+        for (int i: friends_id) {
+            friends.add(storage.getUser(i));
+        }
+        return friends;
+    }
 }
