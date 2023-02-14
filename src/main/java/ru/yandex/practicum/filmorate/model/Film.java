@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-@Data @Slf4j @FieldDefaults(makeFinal=true, level= AccessLevel.PRIVATE)
+@Data
 public class Film {
     @NonFinal
     int id;
@@ -17,10 +17,7 @@ public class Film {
     String description;
     LocalDate releaseDate;
     int duration;
-    @NonFinal
     Set<Integer> likes;
-    @NonFinal
-    Rating rating;
-    @NonFinal
     List<Genre> genres;
+    Mpa mpa;
 }

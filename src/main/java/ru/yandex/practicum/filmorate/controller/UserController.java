@@ -29,12 +29,12 @@ public class UserController {
     }
 
     @PostMapping(StaticPaths.USER_PATH)
-    public void create(@Valid @RequestBody User user) throws ValidationException, SqlUpdateException {
-        service.createUser(user);
+    public User create(@Valid @RequestBody User user) throws ValidationException, SqlUpdateException {
+        return service.createUser(user);
     }
     @PutMapping(StaticPaths.USER_PATH)
-    public void update(@RequestBody User user) throws ValidationException, InvalidUserId {
-        service.updateUser(user);
+    public User update(@RequestBody User user) throws ValidationException, InvalidUserId, SqlUpdateException {
+        return service.updateUser(user);
     }
 
     @GetMapping(StaticPaths.USER_PATH+"/{id}")
@@ -49,7 +49,7 @@ public class UserController {
 
     @DeleteMapping(StaticPaths.USER_PATH+"/{id}/friends/{friendId}")
     public Map<User,User> deleteFriend(@PathVariable int id, @PathVariable int friendId) throws InvalidUserId {
-        return null;
+        return service.deleteFriend(id,friendId);
     }
 
     @GetMapping(StaticPaths.USER_PATH + "/{id}/friends")

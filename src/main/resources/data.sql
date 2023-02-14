@@ -1,16 +1,16 @@
 insert into rating select * from (
 select 1, 'G' union
 select 2, 'PG' union
-select 3, 'PG13' union
+select 3, 'PG-13' union
 select 4, 'R' union
-select 5, 'NC17'
+select 5, 'NC-17'
 ) x where not exists(select * from rating);
 
 insert into genre select * from (
-select 1, 'COMEDY' union
-select 2, 'DRAMA' union
-select 3, 'CARTOON' union
-select 4, 'THRILLER' union
-select 5, 'DOCUMENTARY' union
-select 6, 'ACTION'
+select 1, 'Комедия' union
+select 2, 'Драма' union
+select 3, 'Мультфильм' union
+select 4, 'Триллер' union
+select 5, 'Документальный' union
+select 6, 'Боевик'
 ) x where not exists (select * from genre);

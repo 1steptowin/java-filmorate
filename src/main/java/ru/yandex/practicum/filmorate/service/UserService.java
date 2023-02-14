@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Exception.InvalidUserId;
 import ru.yandex.practicum.filmorate.Exception.SqlUpdateException;
@@ -18,7 +17,7 @@ public class UserService {
     private final UserStorage storage;
 
     @Autowired
-    public UserService(@Qualifier("UserDBStorage") UserStorage storage) {
+    public UserService(UserStorage storage) {
         this.storage = storage;
     }
 
@@ -26,10 +25,13 @@ public class UserService {
         return (ArrayList<User>) storage.findAll();
     }
 
-    public void createUser(User user) throws ValidationException {
+    public User createUser(User user) throws ValidationException {
         if (validate(user)) {
+            if (user.getName().isEmpty()) {
+                user.setName(user.getLogin());
+            }
            try {
-               storage.create(user);
+               return storage.create(user);
            } catch (SqlUpdateException e) {
                throw new ValidationException("Пользователь существует");
            }
@@ -38,10 +40,10 @@ public class UserService {
         }
     }
 
-    public void updateUser(User user) throws ValidationException, InvalidUserId {
+    public User updateUser(User user) throws ValidationException, InvalidUserId, SqlUpdateException {
         if (validate(user)) {
-            storage.update(user);
-        }
+           return storage.update(user);
+        } else throw new ValidationException("Ошибка валидации");
     }
 
     public User findById(int id) throws InvalidUserId {
@@ -70,27 +72,23 @@ public class UserService {
         storage.addFriend(id,friendId);
     }
 
-    public void deleteFriend(User user1, User user2) throws InvalidUserId {
-        if (user1.getFriends() != null
-        & user2.getFriends() != null) {
-            if (user1.getFriends().containsKey(user2.getId())
-                    & user2.getFriends().containsKey(user1.getId())) {
-                HashMap<Integer,Boolean> friends1 = user1.getFriends();
-                friends1.remove(user2.getId());
-                storage.update(user1);
-            }
+    public Map<User,User> deleteFriend(int id, int friendId) throws InvalidUserId {
+        User user = findById(id);
+        User friend = findById(friendId);
+        List<Integer> userFriends = storage.findFriends(id);
+        if (userFriends.contains(friendId)) {
+            storage.delete(id,friendId);
+            return Map.of(storage.getUser(id),storage.getUser(friendId));
+        } else {
+            throw new InvalidUserId("Такого пользователя нет в друзьях");
         }
-         else {
-            throw new InvalidUserId("Некорректный id пользователя");
-        }
-
     }
 
     public Set<User> mutualFriends(int id, int friendId) throws InvalidUserId {
         User user = storage.getUser(id);
         User friend = storage.getUser(friendId);
-        Set<User> userFriends = new HashSet(storage.findFriends(id));
-        Set<User> friendFriends = new HashSet(storage.findFriends(friendId));
+        Set<User> userFriends = new HashSet(findFriends(id));
+        Set<User> friendFriends = new HashSet(findFriends(friendId));
         return findCommonElements(userFriends,friendFriends);
 
     }
@@ -102,7 +100,6 @@ public class UserService {
 
     public List<User> findFriends(int id) throws InvalidUserId {
         List<Integer> friends_id = storage.findFriends(id);
-        System.out.println(friends_id);
         List<User> friends = new ArrayList<>();
         for (int i: friends_id) {
             friends.add(storage.getUser(i));

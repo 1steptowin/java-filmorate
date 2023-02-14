@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.experimental.NonFinal;
 
 @Data
-public class Genre {
+public class Mpa {
     @NonFinal
     int id;
     @NonFinal
