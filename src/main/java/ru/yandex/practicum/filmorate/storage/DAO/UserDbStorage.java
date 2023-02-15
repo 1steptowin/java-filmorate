@@ -11,9 +11,14 @@ import ru.yandex.practicum.filmorate.Exception.SqlUpdateException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FriendsMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.FriendssMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -29,9 +34,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public ArrayList<User> findAll() {
+    public ArrayList<User> findAll() throws InvalidUserId {
         String sql = "SELECT * FROM users";
-        return (ArrayList<User>) jdbcTemplate.query(sql,new UserMapper());
+        ArrayList<User> users = (ArrayList<User>) jdbcTemplate.query(sql,new UserMapper());
+        ArrayList<User> usersNew = new ArrayList<>();
+        for (User user: users) {
+            usersNew.add(getUser(user.getId()));
+        }
+        return usersNew;
     }
 
 
@@ -41,9 +51,10 @@ public class UserDbStorage implements UserStorage {
                 "values (?,?,?,?)";
         try {
             jdbcTemplate.update(sql,user.getEmail(),user.getLogin(),user.getName(),user.getBirthday());
+            log.info("Создан юзер " + user.getName());
             return getUser(getIdByLogin(user.getLogin()));
         } catch (Exception e) {
-            throw new SqlUpdateException("Пользователь не существует");
+            throw new SqlUpdateException("Ошибка создания пользователя");
         }
     }
 
@@ -53,8 +64,10 @@ public class UserDbStorage implements UserStorage {
 
         try {
             jdbcTemplate.update(sql,user.getName(),user.getLogin(),user.getEmail(),user.getBirthday(),user.getId());
+            log.info("Обновлен юзер " + user.getId());
             return getUser(user.getId());
         } catch (Exception e) {
+            log.warn("Ошибка при обновлении пользователя");
             throw new InvalidUserId("Пользователя не существует");
         }
     }
@@ -69,6 +82,19 @@ public class UserDbStorage implements UserStorage {
             user.setLogin(userRows.getString("login"));
             user.setEmail(userRows.getString("email"));
             user.setBirthday(userRows.getDate("birthday").toLocalDate());
+            try {
+                List<HashMap<Integer,Boolean>> map = jdbcTemplate.query("SELECT friend_id,status FROM FRIENDSHIP where user_id = ?",new FriendssMapper(), user.getId());
+                HashMap<Integer,Boolean> friends = new HashMap<>();
+                for (HashMap<Integer,Boolean> i: map) {
+                    for (Integer inter: i.keySet()) {
+                        friends.put(inter,i.get(inter));
+                    }
+                }
+                user.setFriends(friends);
+            } catch (Exception e ) {
+                HashMap<Integer,Boolean> newMap = new HashMap<>();
+                user.setFriends(newMap);
+            }
             return user;
         } else
             throw new InvalidUserId("Такого пользователя нет");
@@ -78,8 +104,13 @@ public class UserDbStorage implements UserStorage {
     public void addFriend(int id, int friendId) {
         String sql = "INSERT INTO friendship (user_id, friend_id, status)" +
                 "values(?,?,?)";
-        jdbcTemplate.update(sql,id,friendId,true);
-        jdbcTemplate.update(sql,friendId,id,false);
+        try {
+            jdbcTemplate.update(sql,id,friendId,true);
+            jdbcTemplate.update(sql,friendId,id,false);
+            log.info("Друзья добавлены: "+ id + " " + friendId);
+        } catch (Exception e) {
+            log.warn("Уже есть строка");
+        }
     }
     @Override
     public List<Integer> findFriends(int id) throws InvalidUserId {
@@ -94,6 +125,7 @@ public class UserDbStorage implements UserStorage {
     public void delete(int id, int friendId) {
         String sql = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql,id,friendId);
+        log.info("Удален друг у " + id + " " + friendId);
     }
 
     private int getIdByLogin (String login) throws SqlUpdateException {
@@ -101,5 +133,18 @@ public class UserDbStorage implements UserStorage {
         if (rowSet.next()) {
             return rowSet.getInt("id");
         } else throw new SqlUpdateException("Проблема в запросе");
+    }
+    private ArrayList<HashMap<String, Object>> resultSetToArrayList(ResultSet rs) throws SQLException {
+        ResultSetMetaData md = rs.getMetaData();
+        int columns = md.getColumnCount();
+        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
+        while (rs.next()) {
+            HashMap<String, Object> row = new HashMap<>(columns);
+            for (int i = 1; i <= columns; ++i) {
+                row.put(md.getColumnName(i), rs.getObject(i));
+            }
+            list.add(row);
+        }
+        return list;
     }
 }

@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.Exception.InvalidFilmId;
 import ru.yandex.practicum.filmorate.Exception.InvalidUserId;
 import ru.yandex.practicum.filmorate.Exception.SqlUpdateException;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
@@ -21,7 +21,7 @@ public class UserService {
         this.storage = storage;
     }
 
-    public ArrayList<User> findAll() {
+    public ArrayList<User> findAll() throws InvalidUserId {
         return (ArrayList<User>) storage.findAll();
     }
 

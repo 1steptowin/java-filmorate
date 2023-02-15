@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.DAO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -16,10 +18,10 @@ import ru.yandex.practicum.filmorate.storage.mapper.MPAMapper;
 
 import java.util.ArrayList;
 import java.util.List;
-
 @Component
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private static final Logger log = LoggerFactory.getLogger(FilmDbStorage.class);
 
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -42,7 +44,9 @@ public class FilmDbStorage implements FilmStorage {
                 "values (?,?,?,?,?)";
         try {
             jdbcTemplate.update(sql,film.getName(),film.getDescription(),film.getReleaseDate(),film.getDuration(),film.getMpa().getId());
+            log.info("Создан фильм " +film.getName());
         } catch (Exception e) {
+            log.warn("Ошибка создания фильма");
             throw new SqlUpdateException("Проблема с запросом");
         }
         int filmid = getFilmByName(film.getName());
@@ -52,6 +56,7 @@ public class FilmDbStorage implements FilmStorage {
             for (Genre genre: film.getGenres()) {
                 jdbcTemplate.update(sqlGenre,filmid,genre.getId());
             }
+            log.info("Фильму " + film.getName() +" добавлены жанры");
         }
     }
 
@@ -60,22 +65,26 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "UPDATE film SET name = ?, description = ?, realease_date = ?, duration = ?, rating_id = ? WHERE id = ?";
         try {
             jdbcTemplate.update(sql,film.getName(),film.getDescription(),film.getReleaseDate(),film.getDuration(),film.getMpa().getId(),film.getId());
-            System.out.println(film.getGenres());
+            log.info("Фильм " + film.getId() + " обновлен");
             if (film.getGenres() != null) {
-                System.out.println("Список не null");
                 try {
                     String sqlDeleteGenre = "DELETE FROM film_genre WHERE film_id = ?";
                     jdbcTemplate.update(sqlDeleteGenre,film.getId());
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    log.warn("Ошибка в методе update film");
                 }
                 String sqlGenre = "INSERT INTO film_genre (film_id,genre_id)" +
                         "VALUES(?,?)";
                 for (Genre genre: film.getGenres()) {
-                    jdbcTemplate.update(sqlGenre,film.getId(),genre.getId());
+                    try {
+                        jdbcTemplate.update(sqlGenre,film.getId(),genre.getId());
+                        log.info("Жанр " + genre.getName() + " добавлен к фильму " + film.getName());
+                    } catch (Exception e) {
+                        log.warn("Попытка добавить дубликат жанра");
+                    }
+
                 }
             }
-
             return getFilm(film.getId());
         } catch (Exception e) {
             throw new InvalidFilmId("Фильма не существует");
@@ -89,6 +98,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "INSERT INTO LIKES (film_id,user_id)" +
                 "VALUES(?,?)";
         jdbcTemplate.update(sql,id,userId);
+        log.info("Фильму " + id + " добавлен лайк");
     }
 
     @Override
@@ -139,6 +149,7 @@ public class FilmDbStorage implements FilmStorage {
     public void deleteLike(int id, int userId) {
         String sql = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
         jdbcTemplate.update(sql,id,userId);
+        log.info("Удален лайк у фильма " + id);
     }
 
     @Override

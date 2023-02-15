@@ -12,7 +12,10 @@ import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -24,7 +27,7 @@ public class UserController {
         this.service = service;
     }
     @GetMapping(StaticPaths.USER_PATH)
-    public ArrayList<User> findAll(){
+    public ArrayList<User> findAll() throws InvalidUserId {
         return service.findAll();
     }
 

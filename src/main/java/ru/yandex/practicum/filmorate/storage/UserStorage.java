@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 
 public interface UserStorage {
-    List<User> findAll();
+    List<User> findAll() throws InvalidUserId;
 
     User create(User user) throws SqlUpdateException;
 
