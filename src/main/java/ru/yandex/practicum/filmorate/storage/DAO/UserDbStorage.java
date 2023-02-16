@@ -51,7 +51,8 @@ public class UserDbStorage implements UserStorage {
                 "values (?,?,?,?)";
         try {
             jdbcTemplate.update(sql,user.getEmail(),user.getLogin(),user.getName(),user.getBirthday());
-            log.info("Создан юзер " + user.getName());
+            log.info(String.format("Create user %s",user.getName()));
+            //log.info("Создан юзер " + user.getName());
             return getUser(getIdByLogin(user.getLogin()));
         } catch (Exception e) {
             throw new SqlUpdateException("Ошибка создания пользователя");
@@ -64,7 +65,8 @@ public class UserDbStorage implements UserStorage {
 
         try {
             jdbcTemplate.update(sql,user.getName(),user.getLogin(),user.getEmail(),user.getBirthday(),user.getId());
-            log.info("Обновлен юзер " + user.getId());
+            log.info(String.format("Update user %d",user.getId()));
+            //log.info("Обновлен юзер " + user.getId());
             return getUser(user.getId());
         } catch (Exception e) {
             log.warn("Ошибка при обновлении пользователя");
@@ -107,7 +109,7 @@ public class UserDbStorage implements UserStorage {
         try {
             jdbcTemplate.update(sql,id,friendId,true);
             jdbcTemplate.update(sql,friendId,id,false);
-            log.info("Друзья добавлены: "+ id + " " + friendId);
+            log.info(String.format("Friends add: %d and %d",id,friendId));
         } catch (Exception e) {
             log.warn("Уже есть строка");
         }
@@ -125,7 +127,7 @@ public class UserDbStorage implements UserStorage {
     public void delete(int id, int friendId) {
         String sql = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql,id,friendId);
-        log.info("Удален друг у " + id + " " + friendId);
+        log.info(String.format("Delete friend: %x and %x",id,friendId));
     }
 
     private int getIdByLogin (String login) throws SqlUpdateException {

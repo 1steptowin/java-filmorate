@@ -44,7 +44,7 @@ public class FilmDbStorage implements FilmStorage {
                 "values (?,?,?,?,?)";
         try {
             jdbcTemplate.update(sql,film.getName(),film.getDescription(),film.getReleaseDate(),film.getDuration(),film.getMpa().getId());
-            log.info("Создан фильм " +film.getName());
+            log.info(String.format("Create film %s",film.getName()));
         } catch (Exception e) {
             log.warn("Ошибка создания фильма");
             throw new SqlUpdateException("Проблема с запросом");
@@ -56,7 +56,7 @@ public class FilmDbStorage implements FilmStorage {
             for (Genre genre: film.getGenres()) {
                 jdbcTemplate.update(sqlGenre,filmid,genre.getId());
             }
-            log.info("Фильму " + film.getName() +" добавлены жанры");
+            log.info(String.format("Фильму %s добавлены жанры", film.getName()));
         }
     }
 
@@ -65,7 +65,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "UPDATE film SET name = ?, description = ?, realease_date = ?, duration = ?, rating_id = ? WHERE id = ?";
         try {
             jdbcTemplate.update(sql,film.getName(),film.getDescription(),film.getReleaseDate(),film.getDuration(),film.getMpa().getId(),film.getId());
-            log.info("Фильм " + film.getId() + " обновлен");
+            log.info(String.format("Film udapte %s",film.getName()));
             if (film.getGenres() != null) {
                 try {
                     String sqlDeleteGenre = "DELETE FROM film_genre WHERE film_id = ?";
@@ -78,7 +78,7 @@ public class FilmDbStorage implements FilmStorage {
                 for (Genre genre: film.getGenres()) {
                     try {
                         jdbcTemplate.update(sqlGenre,film.getId(),genre.getId());
-                        log.info("Жанр " + genre.getName() + " добавлен к фильму " + film.getName());
+                        log.info(String.format("Фильму %s добавлен жанр %d",film.getName(),genre.getId()));
                     } catch (Exception e) {
                         log.warn("Попытка добавить дубликат жанра");
                     }
@@ -98,7 +98,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "INSERT INTO LIKES (film_id,user_id)" +
                 "VALUES(?,?)";
         jdbcTemplate.update(sql,id,userId);
-        log.info("Фильму " + id + " добавлен лайк");
+        log.info(String.format("Add like to film %d",id));
     }
 
     @Override
@@ -149,7 +149,7 @@ public class FilmDbStorage implements FilmStorage {
     public void deleteLike(int id, int userId) {
         String sql = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
         jdbcTemplate.update(sql,id,userId);
-        log.info("Удален лайк у фильма " + id);
+        log.info(String.format("Delete like from film %d",id));
     }
 
     @Override
