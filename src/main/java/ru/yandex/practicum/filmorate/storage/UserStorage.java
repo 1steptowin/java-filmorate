@@ -1,16 +1,23 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.Exception.InvalidUserId;
+import ru.yandex.practicum.filmorate.Exception.SqlUpdateException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public interface UserStorage {
-    ArrayList<User> findAll();
+    List<User> findAll() throws InvalidUserId;
 
-    void create(User user);
+    User create(User user) throws SqlUpdateException;
 
-    User update(User user) throws InvalidUserId;
+    User update(User user) throws InvalidUserId, SqlUpdateException;
 
-    User getUser(int id);
+    User getUser(int id) throws InvalidUserId;
+
+    void addFriend(int id, int friendId);
+
+    List<Integer> findFriends(int id) throws InvalidUserId;
+
+    void delete(int id, int friendId);
 }

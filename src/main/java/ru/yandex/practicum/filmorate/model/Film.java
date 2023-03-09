@@ -4,12 +4,12 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-@Data @Slf4j @FieldDefaults(makeFinal=true, level= AccessLevel.PRIVATE)
+@Data @FieldDefaults(level= AccessLevel.PRIVATE)
 public class Film {
     @NonFinal
     int id;
@@ -19,6 +19,7 @@ public class Film {
     int duration;
     @NonFinal
     Set<Integer> likes;
-    Rating rating;
+    @NonFinal
     List<Genre> genres;
+    Mpa mpa;
 }

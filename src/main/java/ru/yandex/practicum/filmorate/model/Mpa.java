@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 
-@Data @RequiredArgsConstructor
-public class Genre {
+@Data
+public class Mpa {
     @NonFinal
     int id;
     @NonFinal
